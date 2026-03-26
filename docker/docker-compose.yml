@@ -1,0 +1,47 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: exchange
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    working_dir: /app/apps/backend
+    command: /bin/sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://exchange:exchange@db:5432/exchange}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      TIMEZONE: ${TIMEZONE:-Europe/Kyiv}
+    depends_on: [db, redis]
+    ports: ["8000:8000"]
+
+  bot:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.bot
+    working_dir: /app
+    command: python -m bot.main
+    env_file:
+      - ../.env
+    environment:
+      TG_TOKEN: ${TG_TOKEN}
+      BACKEND_API_URL: http://api:8000
+      BACKEND_BOT_TOKEN: ${BACKEND_BOT_TOKEN:-local-dev-service-token}
+      TIMEZONE: ${TIMEZONE:-Europe/Kyiv}
+    depends_on: [api]
+
+volumes:
+  pgdata: {}

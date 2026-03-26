@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Exchange Admin</title>
+  <style>
+    body{font-family:system-ui, sans-serif; margin:2rem;}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
+    .card{border:1px solid #e3e3e3; border-radius:12px; padding:1rem; margin-bottom:1rem;}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Exchange Admin</h1>
+    <nav><a href="/admin/">Dashboard</a> | <a href="/orders/">Orders API</a> | <a href="/users/">Users API</a></nav>
+  </header>
+  {% block content %}{% endblock %}
+</body>
+</html>
