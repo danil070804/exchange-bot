@@ -1,13 +1,24 @@
 declare global {
+  interface TelegramWebAppUser {
+    id: number;
+    username?: string;
+    language_code?: string;
+  }
+
+  interface TelegramWebApp {
+    initData: string;
+    initDataUnsafe?: {
+      user?: TelegramWebAppUser;
+      [key: string]: unknown;
+    };
+    ready: () => void;
+    expand: () => void;
+    close: () => void;
+  }
+
   interface Window {
     Telegram?: {
-      WebApp?: {
-        initData: string;
-        initDataUnsafe?: Record<string, unknown>;
-        ready: () => void;
-        expand: () => void;
-        close: () => void;
-      };
+      WebApp?: TelegramWebApp;
     };
   }
 }
