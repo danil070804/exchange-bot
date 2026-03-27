@@ -1,0 +1,21 @@
+# VCS
+.git
+.gitignore
+
+# Python
+**/__pycache__
+**/*.pyc
+.venv
+
+# Frontend deps/build artifacts
+**/node_modules
+apps/miniapp/dist
+
+# Local env/secrets
+.env
+.env.*
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+.vscode

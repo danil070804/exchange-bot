@@ -5,6 +5,8 @@ COPY apps/miniapp/package*.json ./
 RUN npm install
 
 COPY apps/miniapp ./
+# If host node_modules is copied from Windows, it can break Linux executables (e.g. tsc permission denied).
+RUN rm -rf node_modules && npm install
 RUN npm run build
 
 FROM node:20-alpine
