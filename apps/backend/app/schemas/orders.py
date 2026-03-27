@@ -1,9 +1,10 @@
+from datetime import datetime
 from decimal import Decimal
 from typing import List
 
 from pydantic import BaseModel, Field
 
-from app.domain.enums import OrderStatus
+from app.domain.enums import OrderStatus, OrderEventType
 
 
 class PaymentDetailsIn(BaseModel):
@@ -47,6 +48,52 @@ class OrderOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class PaymentDetailsOut(BaseModel):
+    payout_wallet: str | None = None
+    payout_card_masked: str | None = None
+    payment_card: str | None = None
+    payment_wallet: str | None = None
+    tx_hash: str | None = None
+    comment: str | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+    class Config:
+        from_attributes = True
+
+
+class AttachmentOut(BaseModel):
+    id: int
+    type: str
+    storage_url: str
+    mime_type: str | None = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class OrderEventOut(BaseModel):
+    id: int
+    actor_type: str
+    actor_id: int | None = None
+    event_type: OrderEventType
+    payload_json: dict | None = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class OrderDetailsOut(OrderOut):
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+    expires_at: datetime | None = None
+    payment_details: PaymentDetailsOut | None = None
+    attachments: List[AttachmentOut] = []
+    events: List[OrderEventOut] = []
 
 
 class OrderList(BaseModel):

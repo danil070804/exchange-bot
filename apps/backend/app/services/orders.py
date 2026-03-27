@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import Iterable
 
 from sqlalchemy.orm import Session
+from sqlalchemy.orm import selectinload
 from sqlalchemy import select, func
 
 from app.domain.enums import OrderStatus, OrderEventType
@@ -125,7 +126,7 @@ def list_orders(
     statuses: Iterable[OrderStatus] | None = None,
     limit: int = 50,
 ) -> tuple[list[Order], int]:
-    query = select(Order)
+    query = select(Order).options(selectinload(Order.user))
     if user:
         query = query.where(Order.user_id == user.id)
     if statuses:
@@ -141,7 +142,12 @@ def list_orders(
 
 
 def get_order(session: Session, *, order_id: int, user: User | None = None) -> Order | None:
-    query = select(Order).where(Order.id == order_id)
+    query = select(Order).options(
+        selectinload(Order.user),
+        selectinload(Order.payment_details),
+        selectinload(Order.attachments),
+        selectinload(Order.events),
+    ).where(Order.id == order_id)
     if user:
         query = query.where(Order.user_id == user.id)
     return session.scalar(query)

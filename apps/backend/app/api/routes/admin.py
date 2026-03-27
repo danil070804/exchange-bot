@@ -4,7 +4,7 @@ from sqlalchemy import select
 
 from app.api.deps import admin_auth, get_db
 from app.domain.enums import OrderStatus
-from app.schemas.orders import OrderStatusUpdate, AdminOrderUpdateQuote, OrderList, OrderOut
+from app.schemas.orders import OrderStatusUpdate, AdminOrderUpdateQuote, OrderDetailsOut, OrderList, OrderOut
 from app.schemas.users import UserOut
 from app.schemas.rates import RatePairUpsert
 from app.models import RatePair, User
@@ -26,7 +26,7 @@ def list_orders(
     return {"items": items, "total": total}
 
 
-@router.get("/orders/{order_id}", response_model=OrderOut)
+@router.get("/orders/{order_id}", response_model=OrderDetailsOut)
 def order_details(order_id: int, db: Session = Depends(get_db)):
     order = order_service.get_order(db, order_id=order_id)
     if not order:
@@ -35,7 +35,7 @@ def order_details(order_id: int, db: Session = Depends(get_db)):
     return order
 
 
-@router.post("/orders/{order_id}/status", response_model=OrderOut)
+@router.post("/orders/{order_id}/status", response_model=OrderDetailsOut)
 def update_status(order_id: int, payload: OrderStatusUpdate, db: Session = Depends(get_db)):
     order = order_service.get_order(db, order_id=order_id)
     if not order:
@@ -51,10 +51,11 @@ def update_status(order_id: int, payload: OrderStatusUpdate, db: Session = Depen
     if not ok:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Status transition not allowed")
     db.refresh(order)
+    order.user_tg_id = order.user.tg_id if order.user else None
     return order
 
 
-@router.post("/orders/{order_id}/quote", response_model=OrderOut)
+@router.post("/orders/{order_id}/quote", response_model=OrderDetailsOut)
 def update_quote(order_id: int, payload: AdminOrderUpdateQuote, db: Session = Depends(get_db)):
     order = order_service.get_order(db, order_id=order_id)
     if not order:

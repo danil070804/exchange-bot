@@ -25,7 +25,9 @@ class Settings(BaseSettings):
 
     bot_internal_token: str | None = Field(default=None, alias="BACKEND_BOT_TOKEN")
     admin_api_token: str | None = Field(default=None, alias="ADMIN_API_TOKEN")
+    telegram_bot_token: str | None = Field(default=None, alias="TG_TOKEN")
     public_base_url: str | None = Field(default=None, alias="PUBLIC_BASE_URL")
+    telegram_init_max_age_seconds: int = Field(default=86400, alias="TELEGRAM_INIT_MAX_AGE_SECONDS")
 
     enable_echo_sql: bool = Field(default=False, alias="ECHO_SQL")
 

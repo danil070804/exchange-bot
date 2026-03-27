@@ -5,6 +5,7 @@ from app.api.deps import get_db, current_user, service_auth
 from app.domain.enums import OrderStatus
 from app.schemas.orders import (
     OrderCreate,
+    OrderDetailsOut,
     OrderOut,
     OrderList,
     OrderAttachmentIn,
@@ -49,7 +50,7 @@ def list_my_orders(
     return {"items": items, "total": total}
 
 
-@router.get("/{order_id}", response_model=OrderOut)
+@router.get("/{order_id}", response_model=OrderDetailsOut)
 def order_details(order_id: int, user=Depends(current_user), db: Session = Depends(get_db)):
     order = order_service.get_order(db, order_id=order_id, user=user)
     if not order:
@@ -58,7 +59,7 @@ def order_details(order_id: int, user=Depends(current_user), db: Session = Depen
     return order
 
 
-@router.post("/{order_id}/mark-paid", response_model=OrderOut)
+@router.post("/{order_id}/mark-paid", response_model=OrderDetailsOut)
 def mark_paid(order_id: int, payload: OrderMarkPaid, user=Depends(current_user), db: Session = Depends(get_db)):
     order = order_service.get_order(db, order_id=order_id, user=user)
     if not order:
@@ -67,10 +68,11 @@ def mark_paid(order_id: int, payload: OrderMarkPaid, user=Depends(current_user),
     if not ok:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Status transition not allowed")
     db.refresh(order)
+    order.user_tg_id = user.tg_id
     return order
 
 
-@router.post("/{order_id}/attachments", response_model=OrderOut)
+@router.post("/{order_id}/attachments", response_model=OrderDetailsOut)
 def add_attachment(
     order_id: int,
     payload: OrderAttachmentIn,
