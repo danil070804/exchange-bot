@@ -11,6 +11,7 @@ type Tab = "exchange" | "orders" | "profile";
 export function App() {
   const [tab, setTab] = useState<Tab>("exchange");
   const [activeOrderId, setActiveOrderId] = useState<number | null>(null);
+  const debugMode = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("debug");
 
   const { data: user, isLoading, error } = useTelegramInit();
 
@@ -19,11 +20,28 @@ export function App() {
   }
 
   if (error || !user) {
+    const dbg =
+      typeof window !== "undefined"
+        ? {
+            href: window.location.href,
+            search: window.location.search,
+            hash: window.location.hash,
+            hasTelegram: Boolean((window as any).Telegram),
+            hasWebApp: Boolean((window as any).Telegram?.WebApp),
+            initData: (window as any).Telegram?.WebApp?.initData,
+          }
+        : null;
+
     return (
       <div className="mx-auto max-w-md p-4">
         <div className="rounded-2xl bg-white p-4 text-sm text-danger shadow-sm">
           {String(error || "User is not initialized")}
         </div>
+        {debugMode && dbg ? (
+          <pre className="mt-3 overflow-x-auto rounded-xl bg-slate-100 p-3 text-[11px] text-slate-700">
+            {JSON.stringify(dbg, null, 2)}
+          </pre>
+        ) : null}
       </div>
     );
   }
