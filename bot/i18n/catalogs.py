@@ -8,6 +8,8 @@ LANGS = {
 CATALOG = {
     "uk": {
         "cmd_start.welcome": "Вітаю! Я бот для обміну між банківською карткою та криптовалютою. Оберіть дію нижче.",
+        "cmd_start.open_miniapp": "Відкрити Mini App",
+        "cmd_start.miniapp_hint": "Основний сценарій тепер у Mini App. Якщо кнопка не працює, використайте меню нижче.",
         "menu.direction.card_to_crypto": "Карта → Crypto (USDT)",
         "menu.direction.crypto_to_card": "Crypto (USDT) → Карта",
         "menu.direction.cash_to_crypto": "Готівка → Crypto (USDT)",
@@ -32,6 +34,8 @@ CATALOG = {
 
     "en": {
         "cmd_start.welcome": "Hi! I am a card ↔ crypto exchange bot. Choose an action below.",
+        "cmd_start.open_miniapp": "Open Mini App",
+        "cmd_start.miniapp_hint": "Main flow is now in Mini App. If button is unavailable, use fallback menu below.",
         "menu.direction.card_to_crypto": "Card → Crypto (USDT)",
         "menu.direction.crypto_to_card": "Crypto (USDT) → Card",
         "menu.direction.cash_to_crypto": "Cash → Crypto (USDT)",

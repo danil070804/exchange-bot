@@ -22,6 +22,7 @@ if ENV_PATH.exists():
 
 class Settings:
     TG_TOKEN: str = os.getenv("TG_TOKEN", "")
+    MINI_APP_URL: str | None = os.getenv("MINI_APP_URL")
     # Prefer DATABASE_URL, keep DB_DSN for backward compatibility
     DB_DSN: str = os.getenv("DATABASE_URL") or os.getenv("DB_DSN", "sqlite:///./exchange.db")
     ADMIN_CHAT_ID: int | None = int(os.getenv("ADMIN_CHAT_ID")) if os.getenv("ADMIN_CHAT_ID") else None

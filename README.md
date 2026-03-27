@@ -26,6 +26,7 @@
 1. Скопируй `.env.example` в `.env` и заполни:
 
 - TG_TOKEN — токен Telegram-бота
+- MINI_APP_URL — публичный URL мини-приложения (открывается из /start и /app)
 - BACKEND_API_URL — адрес FastAPI backend (по умолчанию `http://localhost:8000`)
 - BACKEND_BOT_TOKEN — сервисный токен, который бот передает в backend
 - ADMIN_API_TOKEN — токен для админских endpoint'ов

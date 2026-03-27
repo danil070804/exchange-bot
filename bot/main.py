@@ -19,6 +19,7 @@ async def on_startup(bot: Bot):
     await bot.set_my_commands(
         [
             BotCommand(command="start", description="Почати"),
+            BotCommand(command="app", description="Відкрити Mini App"),
             BotCommand(command="order", description="Нова заявка"),
             BotCommand(command="status", description="Мої заявки"),
             BotCommand(command="lang", description="Мова інтерфейсу"),
@@ -31,6 +32,7 @@ async def on_startup(bot: Bot):
     await bot.set_my_commands(
         [
             BotCommand(command="start", description="Start"),
+            BotCommand(command="app", description="Open Mini App"),
             BotCommand(command="order", description="New order"),
             BotCommand(command="status", description="My orders"),
             BotCommand(command="lang", description="Language"),
