@@ -25,6 +25,12 @@ ENV_PATH = ROOT / ".env"
 
 BOT_ONLY = {"TG_TOKEN"}
 BACKEND_ONLY = set()
+MINIAPP_ONLY_PREFIXES = ("VITE_",)
+
+
+def is_local_value(value: str) -> bool:
+    v = value.lower()
+    return "localhost" in v or "127.0.0.1" in v
 
 
 def parse_env(path: Path) -> dict[str, str]:
@@ -47,12 +53,27 @@ def send_to_service(service: str, kv: dict[str, str]):
     subprocess.check_call(args + ["--service", service])
 
 
+def filter_local_infra_vars_for_railway(service: str, kv: dict[str, str]) -> tuple[dict[str, str], list[str]]:
+    """Drop localhost DB/Redis values to avoid breaking Railway deployments."""
+    if service not in {"backend", "exchange-bot"}:
+        return kv, []
+
+    dropped = []
+    filtered = dict(kv)
+    for key in ("DATABASE_URL", "REDIS_URL"):
+        value = filtered.get(key)
+        if value and is_local_value(value):
+            dropped.append(key)
+            filtered.pop(key, None)
+    return filtered, dropped
+
+
 def main():
     parser = argparse.ArgumentParser(description="Push .env vars to Railway service")
     parser.add_argument(
         "--service",
         action="append",
-        choices=["backend", "bot", "exchange-bot"],
+        choices=["backend", "bot", "exchange-bot", "miniapp"],
         required=True,
         help="Target Railway service name",
     )
@@ -68,12 +89,21 @@ def main():
         for k, v in env.items():
             if service == "exchange-bot":
                 kv[k] = v
+            elif service == "miniapp" and any(k.startswith(prefix) for prefix in MINIAPP_ONLY_PREFIXES):
+                kv[k] = v
             elif service == "bot" and (k in BOT_ONLY or k not in BACKEND_ONLY):
                 kv[k] = v
             elif service == "backend" and (k in BACKEND_ONLY or k not in BOT_ONLY):
                 kv[k] = v
+        kv, dropped = filter_local_infra_vars_for_railway(service, kv)
         send_to_service(service, kv)
         print(f"Pushed {len(kv)} variables to service '{service}'")
+        if dropped:
+            print(
+                "Skipped local-only vars for Railway "
+                f"service '{service}': {', '.join(dropped)}. "
+                "Set them from linked Railway Postgres/Redis variables instead."
+            )
 
 
 if __name__ == "__main__":
