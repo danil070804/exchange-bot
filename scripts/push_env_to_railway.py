@@ -9,6 +9,7 @@ Usage examples:
     python scripts/push_env_to_railway.py --service backend
     python scripts/push_env_to_railway.py --service bot
     python scripts/push_env_to_railway.py --service backend --service bot
+    python scripts/push_env_to_railway.py --service exchange-bot
 
 Notes:
 - Secrets are read from your local .env and sent to Railway; .env must NOT be committed.
@@ -51,7 +52,7 @@ def main():
     parser.add_argument(
         "--service",
         action="append",
-        choices=["backend", "bot"],
+        choices=["backend", "bot", "exchange-bot"],
         required=True,
         help="Target Railway service name",
     )
@@ -65,7 +66,9 @@ def main():
     for service in args.service:
         kv = {}
         for k, v in env.items():
-            if service == "bot" and (k in BOT_ONLY or k not in BACKEND_ONLY):
+            if service == "exchange-bot":
+                kv[k] = v
+            elif service == "bot" and (k in BOT_ONLY or k not in BACKEND_ONLY):
                 kv[k] = v
             elif service == "backend" and (k in BACKEND_ONLY or k not in BOT_ONLY):
                 kv[k] = v

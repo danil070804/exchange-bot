@@ -1,10 +1,12 @@
 # Telegram Card ⇄ Crypto Exchange Bot (UA/EN) — v2
 
 Этот бот сделан под заказ как P2P-обменник:
+
 - направление 1: КАРТА (UAH) → CRYPTO (USDT)
 - направление 2: CRYPTO (USDT) → КАРТА (UAH)
 
 Ключевые фичи:
+
 - Мульти-язык: Украинский / English (выбор через /lang).
 - Клиент создаёт заявку через кнопки (без ввода команд).
 - Заявка сразу улетает админам.
@@ -21,21 +23,22 @@
 
     pip install -r requirements.txt
 
-2. Скопируй `.env.example` в `.env` и заполни:
-   - TG_TOKEN — токен Telegram-бота
-   - BACKEND_API_URL — адрес FastAPI backend (по умолчанию http://localhost:8000)
-   - BACKEND_BOT_TOKEN — сервисный токен, который бот передает в backend
-   - ADMIN_API_TOKEN — токен для админских endpoint'ов
-   - DATABASE_URL — DSN PostgreSQL (например `postgresql+psycopg2://exchange:exchange@localhost:5432/exchange`)
-   - ADMIN_IDS / ADMIN_CHAT_ID — список админов для уведомлений
-   - TIMEZONE — таймзона (по умолчанию Europe/Kyiv)
+1. Скопируй `.env.example` в `.env` и заполни:
 
-3. Запуск backend (dev):
+- TG_TOKEN — токен Telegram-бота
+- BACKEND_API_URL — адрес FastAPI backend (по умолчанию `http://localhost:8000`)
+- BACKEND_BOT_TOKEN — сервисный токен, который бот передает в backend
+- ADMIN_API_TOKEN — токен для админских endpoint'ов
+- DATABASE_URL — DSN PostgreSQL (например `postgresql+psycopg2://exchange:exchange@localhost:5432/exchange`)
+- ADMIN_IDS / ADMIN_CHAT_ID — список админов для уведомлений
+- TIMEZONE — таймзона (по умолчанию Europe/Kyiv)
+
+1. Запуск backend (dev):
 
     cd apps/backend
     uvicorn app.main:app --reload
 
-4. Запуск бота:
+1. Запуск бота:
 
     python -m bot.main
 
@@ -45,12 +48,24 @@
 
 Используй `docker/docker-compose.yml` для локального стенда: Postgres, Redis, backend, bot.
 
+### Railway single-service mode
+
+Если не хочешь заводить отдельные Railway services для backend и bot, можно использовать корневой `Dockerfile`.
+Он запускает миграции, затем FastAPI backend и Telegram bot внутри одного Railway service.
+
+В этом режиме:
+
+- `BACKEND_API_URL` можно не трогать, по умолчанию используется `http://127.0.0.1:${PORT}` внутри контейнера.
+- `DATABASE_URL` и `REDIS_URL` должны указывать на Railway Postgres/Redis.
+- сервис слушает порт Railway через backend, бот работает в том же контейнере фоном.
+
 ### Миграции
 
 - Создать миграцию: `cd apps/backend && alembic revision --autogenerate -m "change"`
 - Применить: `cd apps/backend && alembic upgrade head`
 
 ### Railway deploy (monorepo)
+
 - Backend сервис: Build context `.`; Dockerfile `docker/Dockerfile.backend`; Start команду не нужно менять (в Dockerfile запускаются миграции и uvicorn).
 - Bot сервис: Build context `.`; Dockerfile `docker/Dockerfile.bot`; Start `python -m bot.main`.
 - Переменные окружения (оба сервиса):
