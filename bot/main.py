@@ -7,6 +7,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand
 
 from core.config import settings
+from core.db import init_engine
 from bot.handlers import start, kyc, order_flow, admin_panel
 
 logging.basicConfig(level=logging.INFO)
@@ -42,6 +43,8 @@ async def on_startup(bot: Bot):
 async def main():
     if not settings.TG_TOKEN:
         raise RuntimeError("TG_TOKEN is not set in environment or .env file")
+
+    init_engine(settings.DB_DSN)
 
     bot = Bot(
         token=settings.TG_TOKEN,

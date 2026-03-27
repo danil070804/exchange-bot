@@ -12,4 +12,13 @@ def session_dep():
 @router.get("/")
 def list_users(session: Session = Depends(session_dep)):
     users = session.query(User).order_by(User.id.desc()).limit(100).all()
-    return [{"id": u.id, "tg_id": u.tg_id, "kyc_level": u.kyc_level, "kyc_status": u.kyc_status} for u in users]
+    return [
+        {
+            "id": u.id,
+            "tg_id": u.tg_id,
+            "username": u.username,
+            "lang": u.lang,
+            "created_at": u.created_at,
+        }
+        for u in users
+    ]

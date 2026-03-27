@@ -4,6 +4,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 
 from bot.keyboards.admin import admin_main_kb, order_manage_kb
+from bot.services.user_profile import get_user_lang
 from core.config import settings
 from bot.i18n.catalogs import t
 from bot.services.backend_client import backend_client
@@ -46,10 +47,6 @@ def is_admin(user_id: int) -> bool:
     except Exception:
         return False
     return user_id in admin_ids
-
-
-def get_user_lang(tg_id: int) -> str:
-    return "uk"
 
 
 def format_order_line(o: dict) -> str:

@@ -10,6 +10,7 @@ from bot.i18n.catalogs import t
 from core.config import settings
 from bot.services.pricing import get_market_rate
 from bot.services.backend_client import backend_client
+from bot.services.user_profile import get_user_lang
 
 router = Router()
 
@@ -26,15 +27,6 @@ class OrderFSM(StatesGroup):
 
 class ClientReplyFSM(StatesGroup):
     waiting_for_text = State()
-
-
-
-
-
-
-def user_lang(tg_id: int) -> str:
-    # Language is stored in backend; default to Ukrainian until profile API is added
-    return "uk"
 
 
 def detect_direction_code(text: str) -> str | None:
@@ -235,14 +227,14 @@ async def notify_admins_new_order(
 
 @router.message(F.text == "/order")
 async def start_order(msg: Message, state: FSMContext):
-    lang = user_lang(msg.from_user.id)
+    lang = get_user_lang(msg.from_user.id)
     await state.set_state(OrderFSM.choose_direction)
     await msg.answer(t(lang, "order.choose_direction"), reply_markup=main_menu_kb(lang))
 
 
 @router.message(F.text.func(lambda s: "Crypto (USDT)" in s or "Crypto" in s))
 async def start_order_by_button(msg: Message, state: FSMContext):
-    lang = user_lang(msg.from_user.id)
+    lang = get_user_lang(msg.from_user.id)
     direction_code = detect_direction_code(msg.text)
     if not direction_code:
         await start_order(msg, state)
@@ -254,7 +246,7 @@ async def start_order_by_button(msg: Message, state: FSMContext):
 
 @router.message(OrderFSM.choose_direction)
 async def choose_direction(msg: Message, state: FSMContext):
-    lang = user_lang(msg.from_user.id)
+    lang = get_user_lang(msg.from_user.id)
     direction_code = detect_direction_code(msg.text)
     if not direction_code:
         await msg.answer(t(lang, "order.choose_direction"), reply_markup=main_menu_kb(lang))
@@ -269,7 +261,7 @@ async def input_amount(msg: Message, state: FSMContext):
     """Шаг ввода суммы. После валидации переходим к вводу реквизитов
     (кошелька / карты / IBAN в зависимости от направления).
     """
-    lang = user_lang(msg.from_user.id)
+    lang = get_user_lang(msg.from_user.id)
     data = await state.get_data()
     direction_code = data["direction_code"]
 
@@ -358,7 +350,7 @@ async def input_amount(msg: Message, state: FSMContext):
 @router.message(OrderFSM.input_wallet)
 async def input_wallet(msg: Message, state: FSMContext):
     """Получаем адрес крипто-кошелька клиента (UAH -> USDT)."""
-    lang = user_lang(msg.from_user.id)
+    lang = get_user_lang(msg.from_user.id)
     wallet = (msg.text or "").strip()
 
     if not wallet or len(wallet) < 8:
@@ -412,7 +404,7 @@ async def input_wallet(msg: Message, state: FSMContext):
 @router.message(OrderFSM.input_card)
 async def input_card(msg: Message, state: FSMContext):
     """Получаем номер карты клиента (USDT -> UAH)."""
-    lang = user_lang(msg.from_user.id)
+    lang = get_user_lang(msg.from_user.id)
     card = (msg.text or "").replace(" ", "").strip()
 
     if not card or len(card) < 8:
@@ -467,7 +459,7 @@ async def input_card(msg: Message, state: FSMContext):
 @router.message(OrderFSM.input_iban)
 async def input_iban(msg: Message, state: FSMContext):
     """Отримуємо IBAN клієнта (USDT -> IBAN)."""
-    lang = user_lang(msg.from_user.id)
+    lang = get_user_lang(msg.from_user.id)
     iban_text = (msg.text or "").strip()
 
     # Дуже м'яка перевірка — просто щоб не було порожнього тексту
@@ -526,7 +518,7 @@ async def input_iban(msg: Message, state: FSMContext):
 @router.callback_query(F.data.startswith("cl_reply:"))
 async def cb_client_reply(call: CallbackQuery, state: FSMContext):
     """Кнопка клієнта 'Відповісти менеджеру' під повідомленням від адміна."""
-    lang = user_lang(call.from_user.id)
+    lang = get_user_lang(call.from_user.id)
     try:
         order_id = int(call.data.split(":", 1)[1])
     except (ValueError, IndexError):
@@ -554,7 +546,7 @@ async def cb_client_reply(call: CallbackQuery, state: FSMContext):
 @router.message(ClientReplyFSM.waiting_for_text)
 async def client_reply_text(msg: Message, state: FSMContext):
     """Клієнт пише відповідь менеджеру — пересилаємо її адмінам з кнопкою 'Відповісти'."""
-    lang = user_lang(msg.from_user.id)
+    lang = get_user_lang(msg.from_user.id)
     data = await state.get_data()
     order_id = data.get("order_id")
 
@@ -629,7 +621,7 @@ async def client_reply_text(msg: Message, state: FSMContext):
 @router.message(F.photo | F.document | F.text.regexp(r"(?i)(txid|hash|хеш|чек|оплатил|оплата)"))
 async def handle_payment_proof(msg: Message):
     """Ловим чеки/скрины/хеши транзакций от клиентов и шлём уведомление админам."""
-    lang = user_lang(msg.from_user.id)
+    lang = get_user_lang(msg.from_user.id)
 
     order = None
     try:
@@ -769,7 +761,7 @@ async def handle_payment_proof(msg: Message):
 @router.message(F.text.regexp(r"^\+?\d[\d\s\-\(\)]{7,}$"))
 async def handle_client_phone(msg: Message):
     """Ловим номер телефону клієнта та шлемо його адмінам з прив'язкою до останньої заявки."""
-    lang = user_lang(msg.from_user.id)
+    lang = get_user_lang(msg.from_user.id)
     phone = (msg.text or "").strip()
 
     order = None
@@ -871,7 +863,7 @@ async def handle_client_phone(msg: Message):
 @router.message(F.text == "/status")
 @router.message(F.text.in_(["Мої заявки", "My orders"]))
 async def my_orders(msg: Message):
-    lang = user_lang(msg.from_user.id)
+    lang = get_user_lang(msg.from_user.id)
 
     try:
         data = await backend_client.list_orders(msg.from_user.id, limit=10)

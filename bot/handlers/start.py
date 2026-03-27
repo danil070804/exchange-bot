@@ -3,17 +3,10 @@ from aiogram.types import Message
 
 from bot.keyboards.common import main_menu_kb, main_menu_kb_admin
 from bot.i18n.catalogs import t
-from core.db import get_session
-from core.models import User
+from bot.services.user_profile import get_user_lang
 from core.config import settings
 
 router = Router()
-
-
-def get_user_lang(tg_id: int) -> str:
-    with get_session() as db:
-        u = db.query(User).filter(User.tg_id == tg_id).one_or_none()
-        return (u.lang if u and u.lang else "uk")
 
 
 def is_admin_user(user_id: int) -> bool:
