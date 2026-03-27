@@ -1,19 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from core.db import get_session
-from core.models import Order
-from typing import List
+from fastapi import APIRouter, Query
+
+from api.backend_client import backend_admin_client
 
 router = APIRouter()
 
-def session_dep():
-    with get_session() as s:
-        yield s
-
 @router.get("/", response_model=list[dict])
-def list_orders(session: Session = Depends(session_dep)):
-    rows = session.query(Order).order_by(Order.id.desc()).limit(100).all()
-    return [{
-        "id": o.id, "user_id": o.user_id, "direction": o.direction,
-        "status": o.status, "amount_base": str(o.amount_base), "rate": str(o.rate)
-    } for o in rows]
+async def list_orders(limit: int = Query(default=100, le=200)):
+    payload = await backend_admin_client.list_orders(limit=limit)
+    return payload.get("items", [])

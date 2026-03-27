@@ -1,12 +1,79 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="card">
-  <h2>Стартовий дашборд</h2>
-  <p>Це мінімальний шаблон адмінки. Додай списки заявок, фільтри, редагування націнок тощо.</p>
-  <ul>
-    <li><a href="/health">/health</a> — стан API</li>
-    <li><a href="/orders/">/orders</a> — JSON список заявок</li>
-    <li><a href="/users/">/users</a> — JSON список користувачів</li>
-  </ul>
+<div class="grid">
+  <section class="card">
+    <h2>Backend contour</h2>
+    <p class="muted">Web и bot теперь смотрят в один backend: <code>{{ backend_url }}</code></p>
+    <p class="{% if backend_health.status == 'ok' %}ok{% else %}warn{% endif %}">
+      Status: {{ backend_health.status }}
+    </p>
+    {% if backend_error %}
+    <p class="warn">{{ backend_error }}</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Snapshot</h2>
+    <p><strong>{{ orders|length }}</strong> recent orders</p>
+    <p><strong>{{ users|length }}</strong> recent users</p>
+  </section>
+</div>
+
+<div class="grid section-space">
+  <section class="card">
+    <h2>Recent orders</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Status</th>
+          <th>Direction</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td>{{ order.id }}</td>
+          <td>{{ order.status }}</td>
+          <td>{{ order.direction }}</td>
+          <td>{{ order.amount_from }} {{ order.base_currency }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" class="muted">No orders available</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Recent users</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Telegram</th>
+          <th>User</th>
+          <th>Lang</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.tg_id }}</td>
+          <td>{{ user.username or '-' }}</td>
+          <td>{{ user.lang or '-' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" class="muted">No users available</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
 </div>
 {% endblock %}

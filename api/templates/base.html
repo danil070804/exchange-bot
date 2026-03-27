@@ -5,16 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Exchange Admin</title>
   <style>
-    body{font-family:system-ui, sans-serif; margin:2rem;}
-    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;}
-    .card{border:1px solid #e3e3e3; border-radius:12px; padding:1rem; margin-bottom:1rem;}
+    :root { color-scheme: light; }
+    body { font-family: system-ui, sans-serif; margin: 0; background: #f4f6fb; color: #18212f; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; background: #18212f; color: #fff; }
+    main { padding: 2rem; }
+    nav a { color: #d6e4ff; text-decoration: none; margin-left: 1rem; }
+    nav a:first-child { margin-left: 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
+    .card { border: 1px solid #d8dfeb; border-radius: 16px; padding: 1rem 1.25rem; background: #fff; box-shadow: 0 8px 24px rgba(24, 33, 47, 0.06); }
+    .muted { color: #627089; }
+    .ok { color: #0b7a42; }
+    .warn { color: #a65b00; }
+    .section-space { margin-top: 1rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; }
+    th, td { text-align: left; padding: 0.6rem 0; border-bottom: 1px solid #eef2f7; font-size: 0.95rem; }
+    code { background: #eef2f7; padding: 0.1rem 0.35rem; border-radius: 6px; }
   </style>
 </head>
 <body>
   <header>
     <h1>Exchange Admin</h1>
-    <nav><a href="/admin/">Dashboard</a> | <a href="/orders/">Orders API</a> | <a href="/users/">Users API</a></nav>
+    <nav><a href="/admin/">Dashboard</a><a href="/orders/">Orders API</a><a href="/users/">Users API</a><a href="/health">Health</a></nav>
   </header>
-  {% block content %}{% endblock %}
+  <main>{% block content %}{% endblock %}</main>
 </body>
 </html>

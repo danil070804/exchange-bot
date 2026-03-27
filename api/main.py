@@ -1,20 +1,31 @@
 from fastapi import FastAPI
-from api.routers import admin, orders, users, webhooks
+
+from api.backend_client import backend_admin_client
+from api.routers import admin, orders, users
 from core.config import settings
-from core.db import init_engine, Base
-from sqlalchemy import text
 
 app = FastAPI(title="Exchange Admin API")
-
-# Init DB and create tables on startup
-engine = init_engine(settings.DB_DSN)
-Base.metadata.create_all(bind=engine)
 
 app.include_router(admin.router, prefix="/admin")
 app.include_router(orders.router, prefix="/orders")
 app.include_router(users.router, prefix="/users")
-app.include_router(webhooks.router, prefix="/webhooks")
+
 
 @app.get("/health")
-def health():
-    return {"status": "ok", "tz": settings.TIMEZONE}
+async def health():
+    try:
+        backend_health = await backend_admin_client.health()
+        return {
+            "status": "ok",
+            "tz": settings.TIMEZONE,
+            "backend": backend_health,
+            "backend_url": backend_admin_client.base_url,
+        }
+    except Exception as exc:
+        return {
+            "status": "degraded",
+            "tz": settings.TIMEZONE,
+            "backend": {"status": "unreachable"},
+            "backend_url": backend_admin_client.base_url,
+            "error": str(exc),
+        }

@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from app.api.deps import admin_auth, get_db
 from app.domain.enums import OrderStatus
 from app.schemas.orders import OrderStatusUpdate, AdminOrderUpdateQuote, OrderList, OrderOut
+from app.schemas.users import UserOut
 from app.schemas.rates import RatePairUpsert
-from app.models import RatePair
+from app.models import RatePair, User
 from app.services import orders as order_service
 from app.models import Order
 
@@ -95,3 +97,9 @@ def upsert_rate_pair(payload: RatePairUpsert, db: Session = Depends(get_db)):
         pair.source = payload.source
     db.commit()
     return {"base_currency": pair.base_currency, "quote_currency": pair.quote_currency, "buy_rate": str(pair.buy_rate), "sell_rate": str(pair.sell_rate)}
+
+
+@router.get("/users", response_model=list[UserOut])
+def list_users(limit: int = Query(default=100, le=500), db: Session = Depends(get_db)):
+    query = select(User).order_by(User.id.desc()).limit(limit)
+    return list(db.scalars(query).all())
