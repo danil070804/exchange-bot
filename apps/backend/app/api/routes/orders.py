@@ -5,6 +5,7 @@ from app.api.deps import get_db, current_user, service_auth
 from app.domain.enums import OrderStatus
 from app.schemas.orders import (
     OrderCreate,
+    OrderCreateFromUser,
     OrderDetailsOut,
     OrderOut,
     OrderList,
@@ -21,6 +22,24 @@ router = APIRouter(prefix="/orders")
 @router.post("", response_model=OrderOut, dependencies=[Depends(service_auth)])
 def create_order(payload: OrderCreate, db: Session = Depends(get_db)):
     user = get_or_create_user(db, tg_id=payload.telegram_id, username=payload.username, lang=payload.lang)
+    order = order_service.create_order(
+        db,
+        user=user,
+        direction=payload.direction,
+        base_currency=payload.base_currency.upper(),
+        quote_currency=payload.quote_currency.upper(),
+        amount_from=payload.amount_from,
+        rate=payload.rate,
+        fee_amount=payload.fee_amount,
+        network=payload.network,
+        payment_details=payload.payment_details.dict(by_alias=True) if payload.payment_details else None,
+    )
+    order.user_tg_id = user.tg_id
+    return order
+
+
+@router.post("/me", response_model=OrderOut)
+def create_my_order(payload: OrderCreateFromUser, user=Depends(current_user), db: Session = Depends(get_db)):
     order = order_service.create_order(
         db,
         user=user,

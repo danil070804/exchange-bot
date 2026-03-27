@@ -31,6 +31,17 @@ class OrderCreate(BaseModel):
     payment_details: PaymentDetailsIn | None = None
 
 
+class OrderCreateFromUser(BaseModel):
+    direction: str
+    base_currency: str
+    quote_currency: str
+    amount_from: Decimal
+    rate: Decimal | None = None
+    fee_amount: Decimal | None = None
+    network: str | None = None
+    payment_details: PaymentDetailsIn | None = None
+
+
 class OrderOut(BaseModel):
     user_id: int | None = None
     user_tg_id: int | None = None

@@ -45,6 +45,21 @@
 
 По умолчанию бот работает через backend API и не использует локальную SQLite.
 
+## Mini App (frontend)
+
+1. Установка зависимостей:
+
+  cd apps/miniapp
+  npm install
+
+1. Локальный запуск:
+
+  npm run dev
+
+1. Build:
+
+  npm run build
+
 ## Railway / Docker
 
 Используй `docker/docker-compose.yml` для локального стенда: Postgres, Redis, backend, bot.
@@ -69,6 +84,7 @@
 
 - Backend сервис: Build context `.`; Dockerfile `docker/Dockerfile.backend`; Start команду не нужно менять (в Dockerfile запускаются миграции и uvicorn).
 - Bot сервис: Build context `.`; Dockerfile `docker/Dockerfile.bot`; Start `python -m bot.main`.
+- Mini App сервис: Build context `.`; Dockerfile `docker/Dockerfile.miniapp`.
 - Переменные окружения (оба сервиса):
   - `DATABASE_URL` — из Railway Postgres.
   - `TG_TOKEN` — токен бота (нужен только боту).
@@ -78,3 +94,5 @@
   - `TIMEZONE`, `REDIS_URL` (опционально).
 - Healthcheck: `/api/v1/healthz` на порту 8000 (backend).
 - Автоматическая загрузка переменных в Railway: `python scripts/push_env_to_railway.py --service backend --service bot` (нужны установленный `railway` CLI и заполненный локальный `.env`).
+
+После деплоя Mini App укажи его публичный URL в `MINI_APP_URL` для bot сервиса.

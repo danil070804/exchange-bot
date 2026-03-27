@@ -1,0 +1,1 @@
+{"root":["./src/main.tsx","./src/app/app.tsx","./src/app/queryclient.ts","./src/features/auth/usetelegraminit.ts","./src/pages/exchangepage.tsx","./src/pages/orderdetailspage.tsx","./src/pages/orderspage.tsx","./src/pages/profilepage.tsx","./src/shared/api/client.ts","./src/shared/lib/telegram.ts","./src/shared/types/orders.ts"],"version":"5.9.3"}
